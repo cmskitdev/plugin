@@ -16,14 +16,12 @@ func (r *Registry[T]) Register(p Plugin[T]) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.plugins[p.ID()] = p
-	p.Subscribe(r.bus)
 }
 
 func (r *Registry[T]) Unregister(id string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if p, ok := r.plugins[id]; ok {
-		p.Unsubscribe(r.bus)
+	if _, ok := r.plugins[id]; ok {
 		delete(r.plugins, id)
 	}
 }
