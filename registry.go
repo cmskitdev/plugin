@@ -1,10 +1,7 @@
 package plugin
 
 import (
-	"context"
 	"sync"
-
-	"github.com/cmskitdev/engine"
 )
 
 type PluginConfig struct {
@@ -16,23 +13,22 @@ type PluginConfig struct {
 }
 
 func NewPluginRegistry() *PluginRegistry {
-	return &PluginRegistry{
-		plugins: make(map[string]PluginConfig),
+	registry := &PluginRegistry{
+		plugins: make(map[string]interface{}),
 	}
+
+	registry.Register("redis", &redis.Plugin{})
+
+	return registry
 }
 
 type PluginRegistry struct {
-	plugins map[string]PluginConfig
+	plugins map[string]interface{}
 	mu      sync.RWMutex
 }
 
-func (r *PluginRegistry) Register(name string, plugin PluginConfig) {
+func (r *PluginRegistry) Register(name string, plugin interface{}) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.plugins[name] = plugin
-}
-
-type Plugin interface {
-	Transform(ctx context.Context, item engine.DataItemContainer) (engine.DataItemContainer, error)
-	GetConfig() PluginConfig
 }
