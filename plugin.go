@@ -4,14 +4,13 @@ package plugin
 import (
 	"context"
 
-	"github.com/cmskitdev/engine"
-	"github.com/cmskitdev/notion/types"
+	"github.com/cmskitdev/common"
 )
 
 // Plugin is the interface that all plugins must implement.
 type Plugin interface {
-	Transform(ctx context.Context, item engine.DataItemContainer) (engine.DataItemContainer, error)
-	Export(ctx context.Context, objectType types.ObjectType, object interface{}) (interface{}, error)
+	Transform(ctx context.Context, item interface{}) (interface{}, error)
+	Export(ctx context.Context, objectType common.ObjectType, object interface{}) (interface{}, error)
 	GetConfig() PluginConfig
 }
 

@@ -2,9 +2,6 @@ package plugin
 
 import (
 	"sync"
-
-	"github.com/cmskitdev/notion"
-	"github.com/cmskitdev/redis"
 )
 
 type PluginConfig struct {
@@ -19,9 +16,6 @@ func NewPluginRegistry() *PluginRegistry {
 	registry := &PluginRegistry{
 		plugins: make(map[string]interface{}),
 	}
-
-	registry.Register("notion", &notion.Plugin{})
-	registry.Register("redis", &redis.Plugin{})
 
 	return registry
 }
