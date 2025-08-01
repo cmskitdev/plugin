@@ -1,4 +1,4 @@
-package plugin
+package plugins
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 // CommonSettings is the configuration that is common to all plugins.
-type CommonSettings struct {
+type Config struct {
 	Reporter        bool          `json:"reporter" yaml:"reporter"`
 	Workers         int           `json:"workers" yaml:"workers"`
 	RuntimeTimeout  time.Duration `json:"runtime_timeout" yaml:"runtime_timeout"`
