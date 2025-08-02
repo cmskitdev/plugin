@@ -1,6 +1,9 @@
 package plugins
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Registry[T any] struct {
 	mu      sync.RWMutex
@@ -16,6 +19,15 @@ func (r *Registry[T]) Register(p Plugin[T]) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.plugins[p.ID()] = p
+	
+	// Register plugin handlers with the event bus
+	handlers := p.Handlers()
+	for eventName, handler := range handlers {
+		r.bus.Subscribe(Event(eventName), p.ID(), handler)
+		fmt.Printf("Subscribed plugin %s to event %s\n", p.ID(), eventName)
+	}
+	
+	fmt.Printf("Registered plugin %s, plugins: %d\n", p.ID(), len(r.plugins))
 }
 
 func (r *Registry[T]) Unregister(id string) {

@@ -4,7 +4,11 @@ package plugins
 // Plugin is the interface that all plugins must implement.
 type Plugin[T any] interface {
 	ID() string
-	Init() error
+	Init() (PluginRegistration, error)
 	Receive(e Event)
-	Handlers() map[string]EventHandler[T]
+	Handlers() map[Event]EventHandler[T]
+}
+
+type PluginRegistration struct {
+	Events []Event
 }

@@ -1,3 +1,4 @@
+// Package plugins provides a simple event bus for plugins to communicate with each other.
 package plugins
 
 import (
@@ -12,18 +13,20 @@ const (
 	EventInit Event = "init"
 	// EventShutdown is the event that is published when the plugin is shutdown.
 	EventShutdown Event = "shutdown"
-	// EventDispatch is the event that is published when the plugin is dispatched.
-	EventDispatch Event = "dispatch"
+	// EventAnnounce is the event that is published when another plugin is registered.
+	EventAnnounce Event = "announce"
+	// EventMessage is the event that is published when the plugin is receiving a message.
+	EventMessage Event = "message"
 )
 
 // Message is a message that can be published to the event bus.
-type Message[T any] struct {
+type Message struct {
 	Event Event
-	Data  T
+	Data  interface{}
 }
 
 // EventHandler is a function that handles a message.
-type EventHandler[T any] func(Message[T]) error
+type EventHandler[T any] func(Message) error
 
 // EventBus is a bus for publishing and subscribing to events.
 type EventBus[T any] struct {
@@ -42,7 +45,7 @@ func NewEventBus[T any]() *EventBus[T] {
 	return &EventBus[T]{handlers: make(map[Event]map[string]EventHandler[T])}
 }
 
-// Subscribe subscribes to an event.
+// Subscribe binds an event to a plugin.
 func (b *EventBus[T]) Subscribe(e Event, pluginID string, handler EventHandler[T]) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -52,7 +55,7 @@ func (b *EventBus[T]) Subscribe(e Event, pluginID string, handler EventHandler[T
 	b.handlers[e][pluginID] = handler
 }
 
-// Unsubscribe unsubscribes from an event.
+// Unsubscribe unbinds an event from a plugin.
 func (b *EventBus[T]) Unsubscribe(e Event, pluginID string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -62,12 +65,13 @@ func (b *EventBus[T]) Unsubscribe(e Event, pluginID string) {
 }
 
 // Publish publishes a message to the event bus.
-func (b *EventBus[T]) Publish(e Message[T]) {
+func (b *EventBus[T]) Publish(e Message) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	for _, h := range b.handlers[e.Event] {
+
+	for _, handler := range b.handlers[e.Event] {
 		go func(h EventHandler[T]) {
 			_ = h(e) // optionally log errors
-		}(h)
+		}(handler)
 	}
 }
